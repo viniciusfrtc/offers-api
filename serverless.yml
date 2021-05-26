@@ -1,0 +1,81 @@
+service: offers-api
+
+useDotenv: true
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: ${env:AWS_REGION}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:OFFERS_DYNAMODB_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:LOCATIONS_DYNAMODB_TABLE}"
+  environment:
+    OFFERS_DYNAMODB_TABLE: ${env:OFFERS_DYNAMODB_TABLE}
+    LOCATIONS_DYNAMODB_TABLE: ${env:LOCATIONS_DYNAMODB_TABLE}
+
+package:
+  patterns:
+    - '!test/**'
+
+functions:
+  linkOfferToLocation:
+    handler: handlers/linkOfferToLocation.linkOfferToLocation
+    events:
+      - httpApi:
+          path: /offer/location
+          method: post
+
+resources:
+  Resources:
+    OffersDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: brandId
+            AttributeType: S
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: brandId
+            KeyType: HASH
+          -
+            AttributeName: id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${env:OFFERS_DYNAMODB_TABLE}
+    LocationsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: brandId
+            AttributeType: S
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: brandId
+            KeyType: HASH
+          -
+            AttributeName: id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${env:LOCATIONS_DYNAMODB_TABLE}
