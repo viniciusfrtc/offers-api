@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "create-db-scenario": "node setup/create-db-scenario.js",
+    "test": "npx jest",
+    "create-db-scenario": "node setup/createDbScenario.js",
     "deploy": "sls deploy"
   },
   "keywords": [],
